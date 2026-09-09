@@ -1,3 +1,9 @@
 node_modules/
 dist/
 test-results/
+docs/*.aux
+docs/*.log
+docs/*.out
+docs/*.toc
+docs/build-console.txt
+tmp/

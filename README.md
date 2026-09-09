@@ -1,5 +1,9 @@
 # 四旋翼无人机 · Three.js
 
+公开仓库：https://github.com/ZHT1235456/Three-js-QUAV-by-Astra
+
+中文实践记录：[PDF 文档](docs/modeling-phase-2.pdf) · [LaTeX 源文件](docs/modeling-phase-2.tex)
+
 基于 `figures/1.png` 至 `4.png` 的外观比例重建。包含切面机身、程序化碳纤维纹理、四组机臂和双叶旋翼、电机、航灯、滑橇起落架、前视传感器和可俯仰云台相机。
 
 ## 运行
