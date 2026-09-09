@@ -12,7 +12,7 @@ const scene=new T.Scene();scene.background=new T.Color('#e8edf0');
 const pmrem=new T.PMREMGenerator(renderer),env=new RoomEnvironment();scene.environment=pmrem.fromScene(env,.04).texture;env.dispose();pmrem.dispose();scene.environmentIntensity=.75;
 const camera=new T.PerspectiveCamera(36,1,.05,100);const controls=new OrbitControls(camera,renderer.domElement);controls.enableDamping=true;controls.minDistance=3.6;controls.maxDistance=16;controls.maxPolarAngle=Math.PI*.495;controls.target.set(0,1,0);controls.autoRotateSpeed=.6;
 scene.add(new T.HemisphereLight(0xeef6ff,0x6d7880,2));
-const key=new T.DirectionalLight(0xfff5e7,3.5);key.position.set(-3,7,4);key.castShadow=true;key.shadow.mapSize.set(2048,2048);Object.assign(key.shadow.camera,{left:-5,right:5,top:5,bottom:-5,near:.1,far:20});key.shadow.normalBias=.025;key.shadow.bias=-.0001;scene.add(key);
+const key=new T.DirectionalLight(0xfff5e7,3);key.position.set(-3,7,4);key.castShadow=true;key.shadow.mapSize.set(2048,2048);Object.assign(key.shadow.camera,{left:-5,right:5,top:5,bottom:-5,near:.1,far:20});key.shadow.normalBias=.008;key.shadow.bias=-.0001;key.shadow.radius=3;scene.add(key);
 const fill=new T.DirectionalLight(0xd0e3ff,1.8);fill.position.set(4,3,-4);scene.add(fill);
 const ground=new T.Mesh(new T.PlaneGeometry(200,200),new T.MeshStandardMaterial({color:'#e8edf0',roughness:1}));ground.rotation.x=-Math.PI/2;ground.position.y=.022;ground.receiveShadow=true;scene.add(ground);
 const grid=new T.GridHelper(16,64,0xa7b6c0,0xc7d2d9);grid.position.y=.024;grid.material.transparent=true;grid.material.opacity=.3;scene.add(grid);

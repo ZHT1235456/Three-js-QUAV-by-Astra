@@ -1,5 +1,6 @@
 import * as T from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+import { propellerGeometry } from './propeller.js';
 
 // Image-derived proportions. Y is up; +Z is the nose. No physical scale is asserted.
 export function createDrone() {
@@ -10,7 +11,7 @@ export function createDrone() {
   for(let y=0;y<128;y+=8)for(let x=0;x<128;x+=8){const flip=((x+y)/8)%2;ctx.fillStyle=flip?'#33383b':'#515659';ctx.fillRect(x,y,7,7);ctx.strokeStyle=flip?'#555a5c':'#3c4144';for(let n=1;n<7;n+=2){ctx.beginPath();ctx.moveTo(x+(flip?n:0),y+(flip?0:n));ctx.lineTo(x+(flip?n:7),y+(flip?7:n));ctx.stroke();}}
   const texture=new T.CanvasTexture(canvas);texture.wrapS=texture.wrapT=T.RepeatWrapping;texture.repeat.set(2,2);texture.rotation=Math.PI/4;texture.colorSpace=T.SRGBColorSpace;texture.anisotropy=8;
   const mat=(color,metalness=.3,roughness=.5)=>new T.MeshStandardMaterial({color,metalness,roughness});
-  const shell=mat('#42474b'), carbon=new T.MeshStandardMaterial({color:'#93999e',map:texture,metalness:.48,roughness:.48}), black=mat('#141a1e',.55,.34), rubber=mat('#252b2e',.05,.8), silver=mat('#a0a7ab',.8,.26), bladeMat=mat('#34393d',.3,.48), copper=mat('#9e6233',.75,.3);
+  const shell=mat('#303438',.22,.57), carbon=new T.MeshPhysicalMaterial({color:'#777d81',map:texture,metalness:.35,roughness:.53,clearcoat:.22,clearcoatRoughness:.38}), black=mat('#141a1e',.55,.34), rubber=mat('#252b2e',.05,.8), silver=mat('#a0a7ab',.8,.26), bladeMat=mat('#34393d',.3,.48), copper=mat('#9e6233',.75,.3);
   function mesh(g,m,p,x=0,y=0,z=0,name=''){const o=new T.Mesh(g,m);o.position.set(x,y,z);o.name=name;o.castShadow=true;o.receiveShadow=true;p.add(o);return o;}
   function box(p,w,h,d,x,y,z,m=shell,r=.04){return mesh(new RoundedBoxGeometry(w,h,d,2,r),m,p,x,y,z);}
   function cyl(p,r,h,x,y,z,m=black,r2=r){return mesh(new T.CylinderGeometry(r,r2,h,32),m,p,x,y,z);}
@@ -75,14 +76,8 @@ export function createDrone() {
     cyl(rotor,.095,.065,0,0,0,black);
     for(let j=0;j<4;j++){const t=j*Math.PI/2;cyl(rotor,.013,.012,Math.cos(t)*.067,.039,Math.sin(t)*.067,silver);}
     for(const sign of [-1,1]){
-      // Closed, cambered blade: chord grows at the root and tapers into the tip.
-      const sections=[[.055,.032,0],[.14,.047,.008],[.23,.087,.025],[.34,.128,.036],[.48,.119,.025],[.7,.086,.004],[.94,.051,-.017],[1.015,.042,-.023],[1.035,.025,-.02]];
-      const positions=[],indices=[];
-      for(const [x,chord,sweep] of sections){const twist=(.28-x*.19)*(i===0||i===3?1:-1);for(let side=0;side<2;side++)for(let k=0;k<=8;k++){const u=k/4-1,z=sweep+u*chord;positions.push(x,Math.sin(twist)*u*chord+(side===0?1:-1)*(.003+.012*Math.sqrt(Math.max(0,1-u*u))),z);}}
-      const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(positions,3));
-      for(let n=0;n<sections.length-1;n++){const start=indices.length;for(let k=0;k<8;k++){const a=n*18+k,b=a+18;indices.push(a,b,a+1,b,b+1,a+1);const c=a+9,d=b+9;indices.push(c,c+1,d,d,c+1,d+1);}for(const k of [0,8]){const a=n*18+k,b=a+18;indices.push(a,a+9,b,b,a+9,b+9);}g.addGroup(start,indices.length-start,n>=6?1:0);}
-      const start=indices.length;for(const n of [0,sections.length-1])for(let k=0;k<8;k++){const a=n*18+k;indices.push(a,a+1,a+9,a+1,a+10,a+9);}g.addGroup(start,indices.length-start,0);g.setIndex(indices);g.computeVertexNormals();
-      const bladeSurface=bladeMat.clone();bladeSurface.side=T.DoubleSide;const blade=mesh(g,[bladeSurface,silver],rotor,0,.005,0,'Twisted two-blade propeller');blade.rotation.y=sign===1?0:Math.PI;
+      const g=propellerGeometry(i===0||i===3?1:-1);
+      const blade=mesh(g,[bladeMat,silver],rotor,0,.005,0,'Twisted two-blade propeller');blade.rotation.y=sign===1?0:Math.PI;
     }
   }
   const gear=part('Landing skids',[0,-.45,0]);
@@ -103,8 +98,17 @@ export function createDrone() {
   for(const s of [-1,1]){box(gimbal,.055,.24,.11,s*.207,.685,.61,black);const motor=cyl(gimbal,.089,.09,s*.227,.61,.65,black);motor.rotation.z=Math.PI/2;}
   const cameraPivot=new T.Group();cameraPivot.name='Camera pitch';cameraPivot.position.set(0,.61,.65);gimbal.add(cameraPivot);
   box(cameraPivot,.36,.3,.29,0,0,.035,shell,.065);
+  box(cameraPivot,.329,.272,.022,0,0,.181,black,.045);
+  for(const s of [-1,1]){
+    for(const y of [-.094,.094]){const fastener=cyl(cameraPivot,.01,.008,s*.129,y,.2,silver);fastener.rotation.x=Math.PI/2;}
+    for(let j=0;j<6;j++)box(cameraPivot,.009,.09,.009,s*.18,.035,-.058+j*.025,black,.002);
+    const hub=cyl(cameraPivot,.054,.012,s*.277,0,0,shell);hub.rotation.z=Math.PI/2;
+  }
   for(const [r,h,z,m] of [[.133,.035,.188,black],[.108,.02,.213,silver],[.095,.025,.229,black],[.075,.012,.245,mat('#17362e',.8,.12)],[.049,.013,.251,mat('#0c1919',.7,.12)]]){const lens=cyl(cameraPivot,r,h,0,0,z,m);lens.rotation.x=Math.PI/2;}
   const glint=mesh(new T.SphereGeometry(.012,12,8),mat('#91b4b0',.6,.1),cameraPivot,-.024,.027,.26);glint.scale.z=.2;
+  for(const r of [.059,.084,.119])mesh(new T.TorusGeometry(r,.003,8,64),black,cameraPivot,0,0,.248,'Lens concentric ring');
+  const cablePath=new T.CatmullRomCurve3([[.08,.92,.55],[.14,.83,.5],[.14,.72,.49],[.08,.68,.5]].map(v=>new T.Vector3(...v)));
+  mesh(new T.TubeGeometry(cablePath,24,.011,8,false),rubber,gimbal,0,0,0,'Gimbal cable');
   root.userData={description:'Visual reconstruction from figures/1–4.png; arbitrary units; no engineering dimensions.'};
   return {root,rotors,parts,cameraPivot};
 }
