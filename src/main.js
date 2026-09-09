@@ -25,7 +25,7 @@ document.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>view(b.dataset
 const $=id=>document.getElementById(id);
 $('orbit').onchange=e=>controls.autoRotate=e.target.checked;
 $('grid').onchange=e=>grid.visible=e.target.checked;
-function wire(value){drone.root.traverse(o=>{if(o.isMesh)o.material.wireframe=value;});}
+function wire(value){drone.root.traverse(o=>{if(o.isMesh)for(const material of (Array.isArray(o.material)?o.material:[o.material]))material.wireframe=value;});}
 $('wire').onchange=e=>wire(e.target.checked);
 function explode(value){drone.parts.forEach(p=>p.group.position.copy(p.offset).multiplyScalar(value));$('explode-value').value=`${Math.round(value*100)}%`;ground.visible=value===0;}
 $('explode').oninput=e=>explode(+e.target.value);

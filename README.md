@@ -20,3 +20,7 @@ npm run dev
 坐标系：Y 向上，+Z 为机头。所有长度为按参考图估算的相对单位；参考图没有标注尺寸，不保证工程精度。动画只演示旋翼转动，不包含飞行动力学、质量惯量或控制系统仿真。
 
 使用 Three.js 官方 [OrbitControls](https://threejs.org/docs/pages/OrbitControls.html) 和 [GLTFExporter](https://threejs.org/docs/pages/GLTFExporter.html)。纹理由代码生成，无外部纹理/CDN 依赖。
+
+## 精细化版本
+
+机身使用硬切面法线和沿截面的壳体接缝；碳纤维纹理按斜向编织排列。桨叶采用闭合截面构建，包含弦长渐变、弯度、扭转和浅色桨尖，四组旋翼使用配对方向。补充机臂套筒、铰链、螺钉、标识、电机环带与底部通风槽、航灯底座、散热栅格和机头标志。所有细节随相应结构分解并保留在 GLB 导出中。
