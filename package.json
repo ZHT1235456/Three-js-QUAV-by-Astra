@@ -1,0 +1,16 @@
+{
+  "dependencies": {
+    "three": "^0.186.0",
+    "vite": "^8.2.2"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.63.0"
+  },
+  "name": "quadrotor-study",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "vite build",
+    "preview": "vite preview --host 127.0.0.1"
+  }
+}
